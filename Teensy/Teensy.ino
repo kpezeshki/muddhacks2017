@@ -75,10 +75,16 @@ void setup()
   myBME280.begin();
 
 
+  pinMode(15, OUTPUT);  
+  pinMode(6, OUTPUT);  
 }
 //---------------------------------------------------------------
 void loop()
 {
+  //Serial.println(sampleSensor100());
+  //delay(100);
+  //updateLPGas();
+  
   //Check to see if data is available
   if (myCCS811.dataAvailable())
   {
@@ -150,6 +156,11 @@ void printInfoSerial()
   Serial.print(" %RH: ");
   Serial.print(myBME280.readFloatHumidity(), 2);
   Serial.println(" %");
+
+  float ppm = sampleSensor100() * (3.3 / 1024) * 0.172 - 0.0999;
+  Serial.print(" PPM: ");
+  Serial.print(ppm, 2);
+  Serial.println(" PPM");
 
   Serial.println();
 
