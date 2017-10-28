@@ -1,4 +1,4 @@
- /******************************************************************************
+/******************************************************************************
   BME280Compensated.ino
 
   Marshall Taylor @ SparkFun Electronics
@@ -51,8 +51,7 @@ void setup()
   //This begins the CCS811 sensor and prints error status of .begin()
   CCS811Core::status returnCode = myCCS811.begin();
   Serial.print("CCS811 begin exited with: ");
-  //Pass the error code to a function to print the results
-  printDriverError( returnCode );
+
   Serial.println();
 
   //For I2C, enable the following and disable the SPI section
@@ -75,43 +74,31 @@ void setup()
   myBME280.begin();
 
 
-  pinMode(15, OUTPUT);  
-  pinMode(6, OUTPUT);  
+  pinMode(15, OUTPUT);
+  pinMode(6, OUTPUT);
 }
 //---------------------------------------------------------------
-void loop()
-{
+void loop() {
   //Serial.println(sampleSensor100());
   //delay(100);
   //updateLPGas();
-  
-  //Check to see if data is available
-  if (myCCS811.dataAvailable())
-  {
-    //Calling this function updates the global tVOC and eCO2 variables
-    myCCS811.readAlgorithmResults();
-    //printInfoSerial fetches the values of tVOC and eCO2
-    printInfoSerial();
 
-    float BMEtempC = myBME280.readTempC();
-    float BMEhumid = myBME280.readFloatHumidity();
 
-    Serial.print("Applying new values (deg C, %): ");
-    Serial.print(BMEtempC);
-    Serial.print(",");
-    Serial.println(BMEhumid);
-    Serial.println();
+  // put your main code here, to run repeatedly:
+  fetchData();
+  updateWeb();
+  updateGraph();
+  drawText();
 
-    //This sends the temperature data to the CCS811
-    myCCS811.setEnvironmentalData(BMEhumid, BMEtempC);
-  }
-  else if (myCCS811.checkForStatusError())
-  {
-    //If the CCS811 found an internal error, print it.
-    printSensorError();
-  }
+  /*  if (calcState() == false) {
+      String message = "";
+      for (int i = 0; i < 11; i++) {
+        if (healthy[i] == false)
+          message += ("ERROR: " + names[i] + String(data[i]) + " ");
+      }*/
+  textFailures(message);
+}
 
-  delay(2000); //Wait for next reading
 }
 
 //---------------------------------------------------------------
@@ -120,41 +107,6 @@ void printInfoSerial()
   //getCO2() gets the previously read data from the library
   Serial.println("CCS811 data:");
   Serial.print(" CO2 concentration : ");
-  Serial.print(myCCS811.getCO2());
-  Serial.println(" ppm");
-
-  //getTVOC() gets the previously read data from the library
-  Serial.print(" TVOC concentration : ");
-  Serial.print(myCCS811.getTVOC());
-  Serial.println(" ppb");
-
-  Serial.println("BME280 data:");
-  Serial.print(" Temperature: ");
-  Serial.print(myBME280.readTempC(), 2);
-  Serial.println(" degrees C");
-
-  Serial.print(" Temperature: ");
-  Serial.print(myBME280.readTempF(), 2);
-  Serial.println(" degrees F");
-
-  Serial.print(" Pressure: ");
-  Serial.print(myBME280.readFloatPressure(), 2);
-  Serial.println(" Pa");
-
-  Serial.print(" Pressure: ");
-  Serial.print((myBME280.readFloatPressure() * 0.0002953), 2);
-  Serial.println(" InHg");
-
-  Serial.print(" Altitude: ");
-  Serial.print(myBME280.readFloatAltitudeMeters(), 2);
-  Serial.println("m");
-
-  Serial.print(" Altitude: ");
-  Serial.print(myBME280.readFloatAltitudeFeet(), 2);
-  Serial.println("ft");
-
-  Serial.print(" %RH: ");
-  Serial.print(myBME280.readFloatHumidity(), 2);
   Serial.println(" %");
 
   float ppm = sampleSensor100() * (3.3 / 1024) * 0.172 - 0.0999;

@@ -4,6 +4,17 @@ int xcorner = 20;
 int ycorner = 20;
 int numpoints = 20;
 
+#define TEMP 0
+#define PRES 1
+#define HUM 2
+#define CO 3
+#define CH4 4
+#define CO2 5
+#define LPG 6
+#define ALC 7
+#define VOC 8
+#define PART 9
+
 int bounds[10][2] = {{ -10, 50}, {90000, 120000}, {10, 90}, {0, 1000}, {0, 10}, {0, 1000}, {0, 1000}, {0, 1000}, {0, 1000}, {0, 1000}};
 //                   temp-0   pres-1         hum-2   co-3     ch4-4  co2-5    lpg-6    alc-7     voc-8     part-9
 String names[10] = {"Temp", "Pres", "Hum", "CO", "CH4", "CO2", "LPG", "Alc", "VOC", "PART"};
@@ -89,7 +100,7 @@ void drawAxes(char typeName[]) {
     tft.drawFastHLine(ycorner, spacing * i + xcorner, 200, ILI9341_PURPLE);
   }
   tft.drawFastHLine(ycorner, spacing * 3 + xcorner, 200, ILI9341_WHITE);
-  
+
   tft.setTextColor(ILI9341_WHITE);
   tft.setCursor(20, 5);
   tft.print(typeName);
@@ -117,13 +128,19 @@ boolean calcState() {
 void fetchData() {
   // this function magically summons data from sensors, storing data from each sensor in the relevant positions of the data array.
   readBMP():
-  
-  float ppm = sampleSensor100() * (3.3 / 1024) * 0.172 - 0.0999;
-}
 
-void updateWeb() {
+    data[PPM] = sampleSensor100() * (3.3 / 1024) * 0.172 - 0.0999;
+
+    data[CO2] = myCCS811.getCO2();
+    dataTVOC] = myCCS811.getTVOC());
+    data[TEMP] = myBME280.readTempC(), 2);
+    data[PRES] = myBME280.readFloatPressure(), 2);
+    data[HUM] myBME280.readFloatHumidity(), 2);
+  }
+
+  void updateWeb() {
   // this function magically updates the web database with the contents of data
-  for (int i = 0; i<10; i++) {
+  for (int i = 0; i < 10; i++) {
     Serial.print(i);
     Serial.println(data[i]);
   }
@@ -224,26 +241,6 @@ void setup() {
   //TFT_BL_ON;                                  // turn on the background light
   tft.begin();                              //init TFT library
   drawText();
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  fetchData();
-  updateWeb();
-  updateGraph();
-  drawText();
-
-  if (calcState() == false) {
-    String message = "";
-    for (int i = 0; i < 11; i++) {
-      if (healthy[i] == false)
-        message += ("ERROR: " + names[i] + String(data[i]) + " ");
-    }
-    textFailures(message);
-  }
-
-  delay(1000);
-
 }
 
 
