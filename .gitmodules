@@ -1,0 +1,6 @@
+[submodule "Teensy/Libraries/SparkFun_BME280_Arduino_Library"]
+	path = Teensy/Libraries/SparkFun_BME280_Arduino_Library
+	url = git@github.com:sparkfun/SparkFun_BME280_Arduino_Library.git
+[submodule "Teensy/Libraries/SparkFun_CCS811"]
+	path = Teensy/Libraries/SparkFun_CCS811
+	url = git@github.com:sparkfun/SparkFun_CCS811_Arduino_Library.git
